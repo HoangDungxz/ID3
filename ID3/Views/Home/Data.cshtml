@@ -1,0 +1,48 @@
+﻿@model IEnumerable<ID3.Models.Prediction>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Weather Focast</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Humididity
+        </th>
+        <th>
+            Precipitation
+        </th>
+        <th>
+            Temperature
+        </th>
+        <th>
+            Wind
+        </th>
+        <th>
+            Weather
+        </th>
+    </tr>
+
+@foreach (var item in Model) {
+<tr>
+    <td>
+        @Html.DisplayFor(modelItem => item.Humididity.Value)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Precipitation.Id)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Temperature.Id)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Wind.Id)
+    </td>
+    <td>
+        @Html.DisplayFor(modelItem => item.Weather.Name)
+    </td>
+</tr>
+}
+
+</table>
