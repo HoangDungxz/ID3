@@ -139,7 +139,7 @@
     <Compile Include="Models\Humididity.cs" />
     <Compile Include="Models\Precipitation.cs" />
     <Compile Include="Models\Prediction.cs" />
-    <Compile Include="Models\PredictionData.cs" />
+    <Compile Include="Models\ViewModels\PredictionData.cs" />
     <Compile Include="Models\Temperature.cs" />
     <Compile Include="Models\Weather.cs" />
     <Compile Include="Models\Weather_Focast.cs" />

@@ -1,6 +1,7 @@
 using System;
 namespace ID3.Models
 {
+ 
     public class PredictionData
     {
         public Double Precipitation { get; set; }
