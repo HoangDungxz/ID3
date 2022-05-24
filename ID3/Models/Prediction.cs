@@ -7,7 +7,7 @@ namespace ID3.Models
     using System.Data.Entity.Spatial;
 
     [Table("Prediction")]
-    public partial class Prediction
+    public partial class Prediction 
     {
         public int Id { get; set; }
 
