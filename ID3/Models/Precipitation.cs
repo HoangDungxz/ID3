@@ -7,7 +7,7 @@ namespace ID3.Models
     using System.Data.Entity.Spatial;
 
     [Table("Precipitation")]
-    public partial class Precipitation : GenericTable
+    public partial class Precipitation 
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Precipitation()

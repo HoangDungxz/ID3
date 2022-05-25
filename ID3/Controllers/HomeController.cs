@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
+using ID3.helper;
 using ID3.Models;
 using UnityEngine;
 
@@ -17,15 +18,10 @@ namespace ID3.Controllers
         // GET: Home
         public ActionResult Index()
         {
-            List<Prediction> predictions = db.Predictions.ToList();
 
-            float entropy = tinhEntropy(predictions);
 
-            float gain_humididities = tinhGain<Humididity>(predictions, db.Humididities.ToList(), entropy);
-            float gain_precipitations = tinhGain<Precipitation>(predictions, db.Precipitations.ToList(), entropy);
-            float gain_temperatures = tinhGain<Temperature>(predictions, db.Temperatures.ToList(), entropy);
-            float gain_winds = tinhGain<Wind>(predictions, db.Winds.ToList(), entropy);
-   
+
+
             return View();
         }
 
@@ -77,83 +73,127 @@ namespace ID3.Controllers
             return -entropy;
         }
 
-        private float tinhGain<T>(List<Prediction> predictions, List<T> atributes, float entropy) where T : GenericTable
+
+
+
+
+        private Attribute GetBestAttribute(List<Prediction> predictions, float entropy)
         {
-            float sum = db.Predictions.Count();
-            List<Tyle> tyles = new List<Tyle>();
+            Gain gain = new Gain(predictions);
+            float gain_humididities = gain.tinhGain(db.Humididities.ToList(), entropy);
+            float gain_precipitations = gain.tinhGain(db.Precipitations.ToList(), entropy);
+            float gain_temperatures = gain.tinhGain(db.Temperatures.ToList(), entropy);
+            float gain_winds = gain.tinhGain(db.Winds.ToList(), entropy);
 
-            float tich = 0;
-            foreach (GenericTable atribute in atributes)
+            float max_gain = Mathf.Max(gain_precipitations, gain_precipitations, gain_temperatures, gain_winds);
+
+
+            if (max_gain == gain_humididities)
             {
-                int countElement = db.Predictions.Where(x => x.Precipitation.Id == atribute.Id).Count();
+                return new Attribute("Humididity");
+            }
+            else if (max_gain == gain_precipitations)
+            {
+                return new Attribute("Precipitation");
+            }
+            else if (max_gain == gain_temperatures)
+            {
+                return new Attribute("Temperature");
+            }
+            else if (max_gain == gain_winds)
+            {
+                return new Attribute("Wind");
+            }
+            return new Attribute("");
+        }
 
-                float tanxuat = countElement / sum;
+        private TreeNode ID3(int LocationBA =  1)
+        {
 
-                Tyle tyle = new Tyle(atribute.Id, countElement, tanxuat);
+            int count_drizzle = db.Predictions.Where(x => x.Weather.Id == 1).Count();
+            int count_rain = db.Predictions.Where(x => x.Weather.Id == 2).Count();
+            int count_sun = db.Predictions.Where(x => x.Weather.Id == 3).Count();
+            int count_fog = db.Predictions.Where(x => x.Weather.Id == 4).Count();
+            int count_snow = db.Predictions.Where(x => x.Weather.Id == 5).Count();
 
-                tyles.Add(tyle);
+            //int maxCount = Mathf.Max(count_drizzle, count_rain, count_sun, count_fog, count_snow);
 
-                float solandem_drizzle = predictions.Where(x => x.Precipitation.Id == atribute.Id && x.Weather.Name.Contains("drizzle")).Count();
-                float tansuat_drizzle = solandem_drizzle / sum;
+            //if(maxCount == count_drizzle)
+            //{
+            //    return new TreeNode(new Attribute("drizzle"));
+            //}
+            //else if (maxCount == count_rain)
+            //{
+            //    return new TreeNode(new Attribute("rain"));
+            //}
+            //else if (maxCount == count_sun)
+            //{
+            //    return new TreeNode(new Attribute("sun"));
+            //}
+            //else if (maxCount == count_fog)
+            //{
+            //    return new TreeNode(new Attribute("fog"));
+            //}
+            //else if (maxCount == count_snow)
+            //{
+            //    return new TreeNode(new Attribute("snow"));
+            //}
 
-                float solandem_rain = predictions.Where(x => x.Precipitation.Id == atribute.Id && x.Weather.Name.Contains("rain")).Count();
-                float tansuat_rain = solandem_rain / sum;
+            List<Prediction> predictions = db.Predictions.ToList();
 
-                float solandem_sun = predictions.Where(x => x.Precipitation.Id == atribute.Id && x.Weather.Name.Contains("sun")).Count();
-                float tansuat_sun = solandem_sun / sum;
-
-                float solandem_fog = predictions.Where(x => x.Precipitation.Id == atribute.Id && x.Weather.Name.Contains("fog")).Count();
-                float tansuat_fog = solandem_fog / sum;
-
-                float solandem_snow = predictions.Where(x => x.Precipitation.Id == atribute.Id && x.Weather.Name.Contains("snow")).Count();
-                float tansuat_snow = solandem_snow / sum;
-
-                float entropy_con =
-          tansuat_drizzle != 0 ? tansuat_drizzle * Mathf.Log(tansuat_drizzle) : 0 +
-          tansuat_drizzle != 0 ? tansuat_rain * Mathf.Log(tansuat_rain) : 0 +
-        tansuat_drizzle != 0 ? tansuat_sun * Mathf.Log(tansuat_sun) : 0 +
-        tansuat_drizzle != 0 ? tansuat_fog * Mathf.Log(tansuat_fog) : 0 +
-       tansuat_drizzle != 0 ? tansuat_snow * Mathf.Log(tansuat_snow) : 0;
+            float entropy = tinhEntropy(predictions);
 
 
-                tich += (tanxuat * -entropy_con);
+
+            Attribute BestAttribute = GetBestAttribute(predictions, entropy);
+
+            TreeNode Root = new TreeNode(BestAttribute);
+            
+           
+            foreach(Prediction prediction in db.Predictions.ToList())
+            {
 
             }
-            float gain = entropy - tich;
 
-            return gain;
+
+            for (int i = 0; i < BestAttribute.Value.Count; i++)
+            {
+                List<List<string>> Examplesvi = new List<List<string>>();
+                for (int j = 0; j < Examples.Count; j++)
+                {
+                    if (Examples[j][LocationBA].ToString() == BestAttribute.Value[i].ToString())
+                        Examplesvi.Add(Examples[j]);
+                }
+                if (Examplesvi.Count == 0)
+                {
+                    return new TreeNode(new Attribute(GetMostCommonValue(Examplesvi)));
+                }
+                else
+                {
+                    Attribute.Remove(BestAttribute);
+                    Root.AddNode(ID3(LocationBA++);
+                }
+            }
+            return Root;
         }
-
     }
 
-    //private Attribute GetBestAttribute(List<List<string>> Examples, List<Attribute> Attributes, string bestat)
-    //{
-    //    double MaxGain = Gain(Examples, Attributes[0], bestat);
-    //    int Max = 0;
-    //    for (int i = 1; i < Attributes.Count; i++)
-    //    {
-    //        double GainCurrent = Gain(Examples, Attributes[i], bestat);
-    //        if (MaxGain < GainCurrent)
-    //        {
-    //            MaxGain = GainCurrent;
-    //            Max = i;
-    //        }
-    //    }
-    //    return Attributes[Max];
-    //}
 
-    class Tyle
+    class TreeNode
     {
-        public int precipitationId;
-        public int countElement;
-        public float tanxuat;
-
-        public Tyle(int precipitationId, int countElement, float tanxuat)
+        private Attribute Attribute { get; set; }
+        public TreeNode(Attribute attribute)
         {
-            this.precipitationId = precipitationId;
-            this.countElement = countElement;
-            this.tanxuat = tanxuat;
+            this.Attribute = attribute;
         }
+    }
 
+    class Attribute
+    {
+        public Attribute(String name)
+        {
+            Weather = name;
+        }
+        private String Weather { get; set; }
     }
 }

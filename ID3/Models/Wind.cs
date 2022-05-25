@@ -7,7 +7,7 @@ namespace ID3.Models
     using System.Data.Entity.Spatial;
 
     [Table("Wind")]
-    public partial class Wind : GenericTable
+    public partial class Wind 
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Wind()

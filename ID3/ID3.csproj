@@ -135,7 +135,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\GenericTable.cs" />
+    <Compile Include="helper\Gain.cs" />
+    <Compile Include="helper\Tyle.cs" />
     <Compile Include="ThuatToanID3.cs" />
     <Compile Include="Models\Humididity.cs" />
     <Compile Include="Models\Precipitation.cs" />

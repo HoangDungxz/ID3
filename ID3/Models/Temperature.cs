@@ -7,7 +7,7 @@ namespace ID3.Models
     using System.Data.Entity.Spatial;
 
     [Table("Temperature")]
-    public partial class Temperature : GenericTable
+    public partial class Temperature 
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Temperature()
